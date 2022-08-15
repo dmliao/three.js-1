@@ -7253,9 +7253,15 @@ class BufferAttribute {
 				color = new Color();
 			}
 
-			array[offset++] = color.r;
-			array[offset++] = color.g;
-			array[offset++] = color.b;
+			if (this.normalized) {
+				array[offset++] = normalize(color.r, array);
+				array[offset++] = normalize(color.g, array);
+				array[offset++] = normalize(color.b, array);
+			} else {
+				array[offset++] = color.r;
+				array[offset++] = color.g;
+				array[offset++] = color.b;
+			}
 		}
 
 		return this;
@@ -7273,8 +7279,13 @@ class BufferAttribute {
 				vector = new Vector2();
 			}
 
-			array[offset++] = vector.x;
-			array[offset++] = vector.y;
+			if (this.normalized) {
+				array[offset++] = normalize(vector.x, array);
+				array[offset++] = normalize(vector.y, array);
+			} else {
+				array[offset++] = vector.x;
+				array[offset++] = vector.y;
+			}
 		}
 
 		return this;
@@ -7292,9 +7303,15 @@ class BufferAttribute {
 				vector = new Vector3();
 			}
 
-			array[offset++] = vector.x;
-			array[offset++] = vector.y;
-			array[offset++] = vector.z;
+			if (this.normalized) {
+				array[offset++] = normalize(vector.x, array);
+				array[offset++] = normalize(vector.y, array);
+				array[offset++] = normalize(vector.z, array);
+			} else {
+				array[offset++] = vector.x;
+				array[offset++] = vector.y;
+				array[offset++] = vector.z;
+			}
 		}
 
 		return this;
@@ -7312,10 +7329,17 @@ class BufferAttribute {
 				vector = new Vector4();
 			}
 
-			array[offset++] = vector.x;
-			array[offset++] = vector.y;
-			array[offset++] = vector.z;
-			array[offset++] = vector.w;
+			if (this.normalized) {
+				array[offset++] = normalize(vector.x, array);
+				array[offset++] = normalize(vector.y, array);
+				array[offset++] = normalize(vector.z, array);
+				array[offset++] = normalize(vector.w, array);
+			} else {
+				array[offset++] = vector.x;
+				array[offset++] = vector.y;
+				array[offset++] = vector.z;
+				array[offset++] = vector.w;
+			}
 		}
 
 		return this;
@@ -7345,7 +7369,9 @@ class BufferAttribute {
 
 	applyMatrix4(m) {
 		for (let i = 0, l = this.count; i < l; i++) {
-			_vector$9.fromBufferAttribute(this, i);
+			_vector$9.x = this.getX(i);
+			_vector$9.y = this.getY(i);
+			_vector$9.z = this.getZ(i);
 
 			_vector$9.applyMatrix4(m);
 
@@ -7357,7 +7383,9 @@ class BufferAttribute {
 
 	applyNormalMatrix(m) {
 		for (let i = 0, l = this.count; i < l; i++) {
-			_vector$9.fromBufferAttribute(this, i);
+			_vector$9.x = this.getX(i);
+			_vector$9.y = this.getY(i);
+			_vector$9.z = this.getZ(i);
 
 			_vector$9.applyNormalMatrix(m);
 
@@ -7369,7 +7397,9 @@ class BufferAttribute {
 
 	transformDirection(m) {
 		for (let i = 0, l = this.count; i < l; i++) {
-			_vector$9.fromBufferAttribute(this, i);
+			_vector$9.x = this.getX(i);
+			_vector$9.y = this.getY(i);
+			_vector$9.z = this.getZ(i);
 
 			_vector$9.transformDirection(m);
 
@@ -7380,48 +7410,67 @@ class BufferAttribute {
 	}
 
 	set(value, offset = 0) {
+		if (this.normalized) value = normalize(value, this.array);
 		this.array.set(value, offset);
 		return this;
 	}
 
 	getX(index) {
-		return this.array[index * this.itemSize];
+		let x = this.array[index * this.itemSize];
+		if (this.normalized) x = denormalize$1(x, this.array);
+		return x;
 	}
 
 	setX(index, x) {
+		if (this.normalized) x = normalize(x, this.array);
 		this.array[index * this.itemSize] = x;
 		return this;
 	}
 
 	getY(index) {
-		return this.array[index * this.itemSize + 1];
+		let y = this.array[index * this.itemSize + 1];
+		if (this.normalized) y = denormalize$1(y, this.array);
+		return y;
 	}
 
 	setY(index, y) {
+		if (this.normalized) y = normalize(y, this.array);
 		this.array[index * this.itemSize + 1] = y;
 		return this;
 	}
 
 	getZ(index) {
-		return this.array[index * this.itemSize + 2];
+		let z = this.array[index * this.itemSize + 2];
+		if (this.normalized) z = denormalize$1(z, this.array);
+		return z;
 	}
 
 	setZ(index, z) {
+		if (this.normalized) z = normalize(z, this.array);
 		this.array[index * this.itemSize + 2] = z;
 		return this;
 	}
 
 	getW(index) {
-		return this.array[index * this.itemSize + 3];
+		let w = this.array[index * this.itemSize + 3];
+		if (this.normalized) w = denormalize$1(w, this.array);
+		return w;
 	}
 
 	setW(index, w) {
+		if (this.normalized) w = normalize(w, this.array);
 		this.array[index * this.itemSize + 3] = w;
 		return this;
 	}
 
 	setXY(index, x, y) {
 		index *= this.itemSize;
+
+		if (this.normalized) {
+			x = normalize(x, this.array);
+			y = normalize(y, this.array);
+		}
+
 		this.array[index + 0] = x;
 		this.array[index + 1] = y;
 		return this;
@@ -7429,6 +7478,13 @@ class BufferAttribute {
 
 	setXYZ(index, x, y, z) {
 		index *= this.itemSize;
+
+		if (this.normalized) {
+			x = normalize(x, this.array);
+			y = normalize(y, this.array);
+			z = normalize(z, this.array);
+		}
+
 		this.array[index + 0] = x;
 		this.array[index + 1] = y;
 		this.array[index + 2] = z;
@@ -7437,6 +7493,14 @@ class BufferAttribute {
 
 	setXYZW(index, x, y, z, w) {
 		index *= this.itemSize;
+
+		if (this.normalized) {
+			x = normalize(x, this.array);
+			y = normalize(y, this.array);
+			z = normalize(z, this.array);
+			w = normalize(w, this.array);
+		}
+
 		this.array[index + 0] = x;
 		this.array[index + 1] = y;
 		this.array[index + 2] = z;
@@ -21178,7 +21242,9 @@ class InterleavedBufferAttribute {
 
 	applyMatrix4(m) {
 		for (let i = 0, l = this.data.count; i < l; i++) {
-			_vector$6.fromBufferAttribute(this, i);
+			_vector$6.x = this.getX(i);
+			_vector$6.y = this.getY(i);
+			_vector$6.z = this.getZ(i);
 
 			_vector$6.applyMatrix4(m);
 
@@ -21190,7 +21256,9 @@ class InterleavedBufferAttribute {
 
 	applyNormalMatrix(m) {
 		for (let i = 0, l = this.count; i < l; i++) {
-			_vector$6.fromBufferAttribute(this, i);
+			_vector$6.x = this.getX(i);
+			_vector$6.y = this.getY(i);
+			_vector$6.z = this.getZ(i);
 
 			_vector$6.applyNormalMatrix(m);
 
@@ -21202,7 +21270,9 @@ class InterleavedBufferAttribute {
 
 	transformDirection(m) {
 		for (let i = 0, l = this.count; i < l; i++) {
-			_vector$6.fromBufferAttribute(this, i);
+			_vector$6.x = this.getX(i);
+			_vector$6.y = this.getY(i);
+			_vector$6.z = this.getZ(i);
 
 			_vector$6.transformDirection(m);
 
@@ -21213,43 +21283,61 @@ class InterleavedBufferAttribute {
 	}
 
 	setX(index, x) {
+		if (this.normalized) x = normalize(x, this.array);
 		this.data.array[index * this.data.stride + this.offset] = x;
 		return this;
 	}
 
 	setY(index, y) {
+		if (this.normalized) y = normalize(y, this.array);
 		this.data.array[index * this.data.stride + this.offset + 1] = y;
 		return this;
 	}
 
 	setZ(index, z) {
+		if (this.normalized) z = normalize(z, this.array);
 		this.data.array[index * this.data.stride + this.offset + 2] = z;
 		return this;
 	}
 
 	setW(index, w) {
+		if (this.normalized) w = normalize(w, this.array);
 		this.data.array[index * this.data.stride + this.offset + 3] = w;
 		return this;
 	}
 
 	getX(index) {
-		return this.data.array[index * this.data.stride + this.offset];
+		let x = this.data.array[index * this.data.stride + this.offset];
+		if (this.normalized) x = denormalize$1(x, this.array);
+		return x;
 	}
 
 	getY(index) {
-		return this.data.array[index * this.data.stride + this.offset + 1];
+		let y = this.data.array[index * this.data.stride + this.offset + 1];
+		if (this.normalized) y = denormalize$1(y, this.array);
+		return y;
 	}
 
 	getZ(index) {
-		return this.data.array[index * this.data.stride + this.offset + 2];
+		let z = this.data.array[index * this.data.stride + this.offset + 2];
+		if (this.normalized) z = denormalize$1(z, this.array);
+		return z;
 	}
 
 	getW(index) {
-		return this.data.array[index * this.data.stride + this.offset + 3];
+		let w = this.data.array[index * this.data.stride + this.offset + 3];
+		if (this.normalized) w = denormalize$1(w, this.array);
+		return w;
 	}
 
 	setXY(index, x, y) {
 		index = index * this.data.stride + this.offset;
+
+		if (this.normalized) {
+			x = normalize(x, this.array);
+			y = normalize(y, this.array);
+		}
+
 		this.data.array[index + 0] = x;
 		this.data.array[index + 1] = y;
 		return this;
@@ -21257,6 +21345,13 @@ class InterleavedBufferAttribute {
 
 	setXYZ(index, x, y, z) {
 		index = index * this.data.stride + this.offset;
+
+		if (this.normalized) {
+			x = normalize(x, this.array);
+			y = normalize(y, this.array);
+			z = normalize(z, this.array);
+		}
+
 		this.data.array[index + 0] = x;
 		this.data.array[index + 1] = y;
 		this.data.array[index + 2] = z;
@@ -21265,6 +21360,14 @@ class InterleavedBufferAttribute {
 
 	setXYZW(index, x, y, z, w) {
 		index = index * this.data.stride + this.offset;
+
+		if (this.normalized) {
+			x = normalize(x, this.array);
+			y = normalize(y, this.array);
+			z = normalize(z, this.array);
+			w = normalize(w, this.array);
+		}
+
 		this.data.array[index + 0] = x;
 		this.data.array[index + 1] = y;
 		this.data.array[index + 2] = z;
@@ -34273,15 +34376,15 @@ class PointLightHelper extends Mesh {
 		// TODO: delete this comment?
 		const distanceGeometry = new THREE.IcosahedronGeometry( 1, 2 );
 		const distanceMaterial = new THREE.MeshBasicMaterial( { color: hexColor, fog: false, wireframe: true, opacity: 0.1, transparent: true } );
-		this.lightSphere = new THREE.Mesh( bulbGeometry, bulbMaterial );
+			this.lightSphere = new THREE.Mesh( bulbGeometry, bulbMaterial );
 		this.lightDistance = new THREE.Mesh( distanceGeometry, distanceMaterial );
-		const d = light.distance;
-		if ( d === 0.0 ) {
-			this.lightDistance.visible = false;
-		} else {
-			this.lightDistance.scale.set( d, d, d );
-		}
-		this.add( this.lightDistance );
+			const d = light.distance;
+			if ( d === 0.0 ) {
+				this.lightDistance.visible = false;
+			} else {
+				this.lightDistance.scale.set( d, d, d );
+			}
+			this.add( this.lightDistance );
 		*/
 	}
 
@@ -34298,12 +34401,12 @@ class PointLightHelper extends Mesh {
 		}
 		/*
 		const d = this.light.distance;
-			if ( d === 0.0 ) {
-				this.lightDistance.visible = false;
-			} else {
-				this.lightDistance.visible = true;
+				if ( d === 0.0 ) {
+					this.lightDistance.visible = false;
+				} else {
+					this.lightDistance.visible = true;
 			this.lightDistance.scale.set( d, d, d );
-			}
+				}
 		*/
 
 	}
@@ -34702,7 +34805,7 @@ class BoxHelper extends LineSegments {
 		1/___0/|
 		| 6__|_7
 		2/___3/
-			0: max.x, max.y, max.z
+				0: max.x, max.y, max.z
 		1: min.x, max.y, max.z
 		2: min.x, min.y, max.z
 		3: max.x, min.y, max.z

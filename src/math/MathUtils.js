@@ -297,8 +297,6 @@ function normalize( value, array ) {
 
 }
 
-
-
 export {
 	DEG2RAD,
 	RAD2DEG,
